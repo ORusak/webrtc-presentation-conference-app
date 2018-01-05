@@ -1,0 +1,42 @@
+{
+  "name": "webrtc-presentation-conference-app",
+  "description": "Application small conference for show presentation by WebRTC",
+  "version": "0.1.0",
+  "private": false,
+  "keywords": [
+    "react",
+    "webrtc",
+    "google api",
+    "presentation"
+  ],
+  "author": {
+    "name": "Oleg Rusak",
+    "email": "hare.brown@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/ORusak/webrtc-presentation-conference-app"
+  },
+  "repository": {
+    "url": "https://github.com/ORusak/webrtc-presentation-conference-app"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "4.17.4",
+    "react": "~16.2.0",
+    "react-dom": "~16.2.0",
+    "react-redux": "~5.0.6",
+    "redux": "~3.7.2",
+    "redux-thunk": "2.2.0"
+  },
+  "devDependencies": {
+    "prop-types": "^15.6.0",
+    "react-scripts": "1.0.17",
+    "redux-logger": "3.0.6"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
