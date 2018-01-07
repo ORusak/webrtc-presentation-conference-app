@@ -1,22 +1,30 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import PropTypes from 'prop-types';
-import './index.css';
-import App from './App';
-import registerServiceWorker from './registerServiceWorker';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import './index.css'
+import App from './App'
+import registerServiceWorker from './registerServiceWorker'
 
-import { Provider } from 'react-redux';
-import configureStore from './store/configure-store';
+import configureStore from './store/configure-store'
 
 const initialState = {
+  "user": {
+    "name": "Anonymous",
+    "type": null
+  },
+  "room": {
+    //  todo: убрать после реализации инициализации из адресной строки
+    "id": '1232131'
+  },
+  "chat": {
+    "messages": [],
+    "editMessage": ""
+  }
 }
 const store = configureStore(initialState)
 
 ReactDOM.render(
-  <Provider store={ store }>
-    <App />
-  </Provider>,
+  <App store={store} />,
   document.getElementById('root')
-);
+)
 
-registerServiceWorker();
+registerServiceWorker()

@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {get} from 'lodash'
+import get from 'lodash/get'
 
 import './message-list.css'
 import Message from '../message'
@@ -10,11 +10,9 @@ const MessageList = (props, context) => {
     const list = get(context, `[${CHAT_CONTEXT}].list`) || []
 
     return (
-        <div className="card w-100">
-            <ul>
-                {list.map((message, i) => (<Message key={i} message={message}/>))}
-            </ul>
-        </div>
+        <ul className="card w-100">
+            {list.map((message, i) => (<Message key={i} message={message}/>))}
+        </ul>
     )
 }
 

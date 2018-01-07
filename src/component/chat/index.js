@@ -32,7 +32,7 @@ class Chat extends Component {
     }
 
     render () {
-        const {className, ...props} = this.props
+        const {className} = this.props
         
         return (
         <div className={`h-100 ${className}`}>
