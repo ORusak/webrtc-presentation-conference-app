@@ -15,17 +15,39 @@ const allowEventType = [
 ]
 
 class SignalingServer {
-    constructor() {
 
-        this._socket = io('http://localhost:8080')
+    /**
+     * @constructor
+     * 
+     * @param {object} options -
+     * @param {string} options.url -
+     * @param {string} options.room -
+     * 
+     */
+    constructor(options) {
+        //  todo: заменить ссылку на сигнальный сервер на настройку
+        //  связанный сокет пользователя-участника
+        this._socket = io(options.url)
+
+        //  для автоматического подмешивания в данные обмена
+        this._room = options.room
     }
 
-    send (type, data) {
+    /**
+     * 
+     * @param {string} type тип события
+     * @param {object} [payload={}] полезная нагрузка
+     */
+    send (type, payload={}) {
         if (allowEventType.includes(type)) {
-            this._socket.emit(type, data)
+            const fullData = Object.assign({}, payload, { room: this._room })
+
+            this._socket.emit(type, fullData)
+
+            return null
         }
         
-        throw new Error('Wrong type signal')
+        throw new Error(`Wrong type signal: [${type}]`)
     }
 
     set oninit (callback) {
