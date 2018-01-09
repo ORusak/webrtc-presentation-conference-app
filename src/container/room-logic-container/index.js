@@ -12,7 +12,8 @@ const mapStateToProps = (state) => {
 
     return {
         room: state.room.id,
-        user: state.user
+        user: state.user,
+        messages: state.chat.messages 
     }
 }
 
@@ -22,6 +23,11 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         setUserType: type => {
 
             dispatch(setUserType(type))
+
+            return null
+        },
+
+        setMessageAsSend: id => {
 
             return null
         }
