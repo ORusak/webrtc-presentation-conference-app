@@ -116,6 +116,21 @@ class PoolPeerConnection {
         throw new Error('[PoolPeerConnection.addIceCandidate] Expected connection id')
     }
 
+    sendAll (label, data) {
+
+        forEach(this._pool, (conn, id) => {
+            const channel = conn.channels[label]
+
+            if (channel) {
+                channel.send(JSON.stringify(data))
+
+                return null
+            }
+
+            throw new Error(`[PoolPeerConnection.sendAll] Peer [${id}]. Not found channel with label [${label}]`)
+        })
+    }
+
     set onicecandidate (callback) {
         this._onicecandidate = callback
 

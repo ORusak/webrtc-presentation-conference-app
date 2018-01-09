@@ -29,7 +29,9 @@ class RoomLogic extends Component {
             type: PropTypes.oneOf(['owner', 'visitor', null])
         }),
         messages: PropTypes.array,
-        setUserType: PropTypes.func.isRequired
+        setUserType: PropTypes.func.isRequired,
+        addMessage: PropTypes.func.isRequired,
+        setMessageAsSend: PropTypes.func.isRequired,
     }
 
     state = {
@@ -85,20 +87,21 @@ class RoomLogic extends Component {
     }
 
     render() {
-        const {user, messages} = this.props
+        const {user, messages, addMessage, setMessageAsSend} = this.props
         const isTypeNotDefine = isNil(user.type)
-        let RoomComponent
         
         if (isTypeNotDefine) {
             return <Room/>
         }
         
-        RoomComponent = user.type === 'owner' ? RoomOwner : RoomVisitor
+        const RoomComponent = user.type === 'owner' ? RoomOwner : RoomVisitor
 
         return <RoomComponent 
             signaling={this.state.signaling} 
             user={user}
-            messages={messages}/>
+            messages={messages}
+            addMessage={addMessage}
+            setMessageAsSend={setMessageAsSend}/>
     }
 }
 

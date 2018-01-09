@@ -33,7 +33,8 @@ class RoomOwner extends Component {
             name: PropTypes.string,
             type: PropTypes.oneOf(['owner'])
         }),
-        messages: PropTypes.array
+        messages: PropTypes.array,
+        setMessageAsSend: PropTypes.func.isRequired,
     }
 
     state = {
@@ -44,6 +45,21 @@ class RoomOwner extends Component {
         ownerMedia: null,
         //  список соединений владельца с участниками
         poolConnectionVisitors: new PoolPeerConnection()
+    }
+
+    sendMessage = (message) => {
+        const {poolConnectionVisitors} = this.state
+        const label = 'chat'
+
+        //  в спецификации не понятно как точно узнать, что сообщение 
+        //  доставлено. в первичной реалиации считаем что это всегда успешно
+        //  
+        //  по идее можно подписаться на onerror и там установить, что сообщение не доставлено
+        //  или требовать подтвержения с получателя
+        //  todo: реаализовать обработку гарантированной доставки сообщения
+        poolConnectionVisitors.sendAll(label, message)
+
+        this.props.setMessageAsSend(message.id)
     }
 
     async componentDidMount() {
@@ -158,6 +174,12 @@ class RoomOwner extends Component {
         console.log('[RoomOwner.shouldComponentUpdate] Call update')
 
         return true
+    }
+
+    componentDidUpdate (prevProps, prevState) {
+        const {messages} = this.props
+
+        messages.forEach(this.sendMessage) 
     }
 
     render() {

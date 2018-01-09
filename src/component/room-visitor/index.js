@@ -29,7 +29,7 @@ const configuration = {
     ]
 }
 
-class RoomLogic extends Component {
+class RoomVisitor extends Component {
     static defaultProps = {
         messages: []
     }
@@ -40,7 +40,8 @@ class RoomLogic extends Component {
             name: PropTypes.string,
             type: PropTypes.oneOf(['visitor'])
         }),
-        messages: PropTypes.array
+        messages: PropTypes.array,
+        addMessage: PropTypes.func.isRequired,
     }
 
     state = {
@@ -180,11 +181,24 @@ class RoomLogic extends Component {
 
         channel.onopen = () => {
             console.log('[peerConnection.channel] enable chat')
-
-            channel.send(JSON.stringify({ text: 'Hi'}))
         }
         channel.onmessage = (event) => {
-            console.log('[peerConnection.channel] get message chat', event.data)
+            const {id, text, user, date} = JSON.parse(event.data)
+
+            console.log('[peerConnection.channel.chat.onmessage] get message chat with id', id)
+
+            //  фильтрация сообщений
+
+            //  если нам прислали наши же сообщения. например при общей рассылке-синхронизации
+            const isOwnMessage = this.props.user.id === user.id
+
+            if (isOwnMessage) {
+                console.log('[peerConnection.channel.chat.onmessage] skip own message', id)
+
+                return null
+            }
+            
+            this.props.addMessage(id, text, user, date)
         }
     }
 
@@ -212,4 +226,4 @@ class RoomLogic extends Component {
     }
 }
 
-export default RoomLogic
+export default RoomVisitor
