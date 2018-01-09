@@ -3,13 +3,16 @@
  */
 
 import isNil from 'lodash/isNil'
+import shortid from 'shortid'
 
-// import reducerService from './reducer-service'
+import reducerService from './reducer-service'
 
-// const SET_USER_TYPE = 'webrtc-presentation-conference/user/SET_USER_TYPE'
+const ADD_MESSAGE = 'webrtc-presentation-conference/chat/ADD_MESSAGE'
+const EDIT_MESSAGE = 'webrtc-presentation-conference/chat/EDIT_MESSAGE'
 
 const reducerMap = {
-    // [SET_USER_TYPE]: reducerService.setUserType
+    [ADD_MESSAGE]: reducerService.addMessage,
+    [EDIT_MESSAGE]: reducerService.editMessage,
 }
 
 export default function reducer (state = {}, action) {
@@ -24,4 +27,22 @@ export default function reducer (state = {}, action) {
 }
 
 //  фабрики действий
+export function addMessage (text, user, date = (new Date()).toISOString() ) {
+
+    return {
+        id: shortid.generate(),
+        type: ADD_MESSAGE,
+        text,
+        date,
+        user,
+    }
+}
+
+export function editMessage (message) {
+
+    return {
+        type: EDIT_MESSAGE,
+        message,
+    }
+}
 

@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import Chat from '../chat'
+import MessageListContainer from '../../container/controls'
+import ControlsContainer from '../../container/controls'
 import Video from '../video'
 
 const Room = (props) => (
@@ -26,14 +27,11 @@ const Room = (props) => (
         </div>
       </div>
       <div className="col-4 h-100 p-1">
-        <Chat>
-          <div className="row h-75 ml-4">
-            <Chat.List/>
-          </div>
-          <div className="row h-25 ml-4 pt-1">
-            <Chat.Controls/>
-          </div>
-        </Chat>
+        <div className="row h-75 ml-4">
+        </div>
+        <div className="row h-25 ml-4 pt-1">
+          <ControlsContainer/>
+        </div>
       </div>
     </div>
   </div>

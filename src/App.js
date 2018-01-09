@@ -1,14 +1,12 @@
 import React, {Component} from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom'
 import {Provider} from 'react-redux'
-import adapter from 'webrtc-adapter/out/adapter'
+import 'webrtc-adapter/out/adapter'
 
 import './App.css';
 
 //  import ChooseRoom from './component/choose-room'
 import RoomLogicContainer from './container/room-logic-container'
-
-console.log(adapter)
 
 class App extends Component {
 

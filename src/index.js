@@ -1,13 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import shortid from 'shortid'
+
 import './index.css'
 import App from './App'
+
 import registerServiceWorker from './registerServiceWorker'
 
 import configureStore from './store/configure-store'
 
 const initialState = {
   "user": {
+    "id": shortid.generate(),
     "name": "Anonymous",
     "type": null
   },
@@ -17,7 +21,7 @@ const initialState = {
   },
   "chat": {
     "messages": [],
-    "editMessage": ""
+    "messageText": ""
   }
 }
 const store = configureStore(initialState)

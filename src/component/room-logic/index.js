@@ -41,6 +41,7 @@ class RoomLogic extends Component {
     static propTypes = {
         room: PropTypes.string.isRequired,
         user: PropTypes.shape({
+            id: PropTypes.string.isRequired,
             name: PropTypes.string,
             type: PropTypes.oneOf(['owner', 'visitor', null])
         }),
