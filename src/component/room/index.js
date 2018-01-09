@@ -12,7 +12,7 @@ const Room = (props) => (
         <div className="row h-75">
           <div className="col h-100 card border-primary">
             <img
-              src="http://lorempicsum.com/rio/800/500/4"
+              src="/webrtc.jpg"
               className="img-fluid"
               alt="Responsive"/>
           </div>
