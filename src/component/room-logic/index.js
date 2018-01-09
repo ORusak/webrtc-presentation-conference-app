@@ -7,6 +7,7 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 
 import SignalingServer from '../../lib/signaling-server'
+import poolConnectionVisitors from '../../instance/pool-connection-visitors'
 
 import Room from '../room'
 
@@ -114,7 +115,7 @@ class RoomLogic extends Component {
     }
 
     //  todo: разбить компоненту на две отдельных для owner и visitor
-    //  это позволит получить более управляемые компоненты. С возможностью в дальнейшем 
+    //  это позволит получить более управляемые компоненты. С возможностью, например, в дальнейшем 
     //  развести на разные бандлы
     async componentWillReceiveProps(nextProps) {
         //  если пользователь собственник
@@ -243,22 +244,18 @@ class RoomLogic extends Component {
         }
 
         if (type === 'owner') {
-            //  создали соединение установили медиа поток
-            //  пока только на 1 соединение, дальше нужен пул
-            const peerConnection = RTCPeerConnection(configuration)
-            
-            localMedia
-                .getTracks()
-                .forEach((track) => peerConnection.addTrack(track, localMedia))
-
-            let author = null
-
             //  владелец ожидает приглашений
             signaling.onsdp = async (data) => {
                 const { payload } = data
                 const { desc } = payload
 
-                author = data.author
+                const author = data.author
+
+                poolConnectionVisitors.add(author)
+
+                localMedia
+                    .getTracks()
+                    .forEach((track) => poolConnectionVisitors.addTrack(author, track, localMedia))
 
                 console.log('[signaling.onsdp.owner] get sdp desc', desc)
 
@@ -270,16 +267,16 @@ class RoomLogic extends Component {
                 }
 
                 try {
-                    await peerConnection.setRemoteDescription(desc)
+                    await poolConnectionVisitors.setRemoteDescription(author, desc)
                     
-                    const descAnswer = await peerConnection.createAnswer()
+                    const descAnswer = await poolConnectionVisitors.createAnswer(author)
                     
-                    await peerConnection.setLocalDescription(descAnswer.toJSON())
+                    await poolConnectionVisitors.setLocalDescription(author, descAnswer.toJSON())
                     
                     //  отправим ответ автору приглашения
                     signaling.send('sdp', {
                         payload: {
-                            desc: peerConnection.localDescription,
+                            desc: poolConnectionVisitors.getLocalDescription(author),
                         },
                         author
                     })
@@ -288,20 +285,20 @@ class RoomLogic extends Component {
                 }
             }
 
-            peerConnection.onicecandidate = ({candidate}) => {
+            poolConnectionVisitors.onicecandidate = (id, {candidate}) => {
                 console.log('[peerConnection.onicecandidate.owner] get candidate', candidate)
 
                 if (candidate) {
-                    console.log('[peerConnection.onicecandidate.owner] send candidate', author)
+                    console.log('[peerConnection.onicecandidate.owner] send candidate', id)
 
                     signaling.send('ice', {
                         payload: { candidate },
-                        author
+                        author: id
                     })
                 }
             }
 
-            peerConnection.ontrack = (event) => {
+            poolConnectionVisitors.ontrack = (id, event) => {
                 const remoteMedia = event.streams[0]
 
                 console.log('[peerConnection.ontrack.owner] get remote media', remoteMedia)
@@ -316,12 +313,12 @@ class RoomLogic extends Component {
                 this.setState({visitorMedia: remoteMedia })
             }
 
-            signaling.onice = ({ payload }) => {
+            signaling.onice = ({ payload, author }) => {
                 const { candidate } = payload
 
-                console.log('[signaling.onice] get candidate.owner', candidate)
+                console.log('[signaling.onice] get candidate.owner', author, candidate)
 
-                peerConnection.addIceCandidate(candidate)
+                poolConnectionVisitors.addIceCandidate(author, candidate)
             }
         }
     }
