@@ -150,7 +150,7 @@ class RoomLogic extends Component {
              * Ошибка - падение что данные пакета не разрезолвенный promise. Хотя в лог перед установкой выводятся нормальные 
              * объекты. Возможно проблема в асинхронной установке или в полифилах async/await.
              * 
-             * Событие срабатывает несколько раз правильно, судя по всему, это реакция на добавление в соединение 
+             * Событие срабатывает несколько раз правильно. Судя по всему, это реакция на добавление в соединение 
              * новых треков. Но не понятно почему такая реакция при обработке множественных sdp, ice пакетов.
              * localMedia
                 .getTracks()
@@ -242,6 +242,21 @@ class RoomLogic extends Component {
 
                 peerConnection.addIceCandidate(candidate)
             }
+
+            // создаем канал для передачи сообщений
+            const dataChannelOptions = {
+                ordered: false,
+            }
+            const channel = peerConnection.createDataChannel('chat', dataChannelOptions)
+
+            channel.onopen = () => {
+                console.log('[peerConnection.channel] enable chat')
+
+                channel.send(JSON.stringify({ text: 'Hi'}))
+            }
+            channel.onmessage = (event) => {
+                console.log('[peerConnection.channel] get message chat', event.data)
+            }
         }
 
         if (type === 'owner') {
@@ -312,6 +327,17 @@ class RoomLogic extends Component {
                 console.log('[peerConnection.ontrack.owner] set remote media', remoteMedia)
 
                 this.setState({visitorMedia: remoteMedia })
+            }
+
+            poolConnectionVisitors.ondatachannel = (id, event) => {
+                const channel = event.channel
+
+                channel.onopen = () => {
+                    console.log('[peerConnection.channel.owner] enable chat')
+                }
+                channel.onmessage = (event) => {
+                    console.log('[peerConnection.channel.owner] get message chat', JSON.parse(event.data))
+                }
             }
 
             signaling.onice = ({ payload, author }) => {

@@ -27,16 +27,36 @@ class PoolPeerConnection {
     constructor () {
         //  todo: изучить вариант заменить на WeekMap
         //  по идее если сборщик решил что соединение не нужно, то и нам оно уже не нужно
+
+        /**
+         * @typedef Connection
+         * 
+         * @prop {object} peer соединение
+         * @prop {object} channels список data соединений. где ключ label, значение - экземпляр
+         * 
+         */
+
+        /**
+         * @typedef Pool
+         * 
+         * Ассоциативный массив Connection. Где ключ - идентификатор соединения сокета собеседника.
+         */
         this._pool = {}
     }
 
     add (id) {
         if (id) {
-            this._pool[id] = RTCPeerConnection(configuration)
-            this._pool[id].ontrack = this._ontrack.bind(this._pool[id], id)
-            this._pool[id].onicecandidate = this._onicecandidate.bind(this._pool[id], id)
+            const peer = RTCPeerConnection(configuration)
 
-            return this._pool[id]
+            this._pool[id] = { 
+                peer,
+                channels: {}
+             }
+            peer.ontrack = this._ontrack.bind(peer, id)
+            peer.onicecandidate = this._onicecandidate.bind(peer, id)
+            peer.ondatachannel = this._ondatachannel.bind(peer, id)
+
+            return peer
         }
 
         throw new Error('[PoolPeerConnection.add] Expected connection id')
@@ -45,7 +65,7 @@ class PoolPeerConnection {
     addTrack (id, track, localMedia) {
         if (id) {
             
-            return this._pool[id].addTrack(track, localMedia)
+            return this._pool[id].peer.addTrack(track, localMedia)
         }
 
         throw new Error('[PoolPeerConnection.addTrack] Expected connection id')
@@ -54,7 +74,7 @@ class PoolPeerConnection {
     setRemoteDescription (id, desc) {
         if (id) {
             
-            return this._pool[id].setRemoteDescription(desc)
+            return this._pool[id].peer.setRemoteDescription(desc)
         }
 
         throw new Error('[PoolPeerConnection.setRemoteDescription] Expected connection id')
@@ -63,7 +83,7 @@ class PoolPeerConnection {
     createAnswer(id) {
         if (id) {
             
-            return this._pool[id].createAnswer()
+            return this._pool[id].peer.createAnswer()
         }
 
         throw new Error('[PoolPeerConnection.createAnswer] Expected connection id')
@@ -72,7 +92,7 @@ class PoolPeerConnection {
     setLocalDescription(id, desc) {
         if (id) {
             
-            return this._pool[id].setLocalDescription(desc)
+            return this._pool[id].peer.setLocalDescription(desc)
         }
 
         throw new Error('[PoolPeerConnection.setLocalDescription] Expected connection id')
@@ -81,7 +101,7 @@ class PoolPeerConnection {
     getLocalDescription(id) {
         if (id) {
             
-            return this._pool[id].localDescription
+            return this._pool[id].peer.localDescription
         }
 
         throw new Error('[PoolPeerConnection.getLocalDescription] Expected connection id')
@@ -90,7 +110,7 @@ class PoolPeerConnection {
     addIceCandidate(id, candidate) {
         if (id) {
             
-            return this._pool[id].addIceCandidate(candidate)
+            return this._pool[id].peer.addIceCandidate(candidate)
         }
 
         throw new Error('[PoolPeerConnection.addIceCandidate] Expected connection id')
@@ -101,7 +121,7 @@ class PoolPeerConnection {
 
         forEach(this._pool, (conn, id) => {
 
-            conn.onicecandidate = callback.bind(conn, id)
+            conn.peer.onicecandidate = callback.bind(conn, id)
         })
     }
 
@@ -110,7 +130,25 @@ class PoolPeerConnection {
 
         forEach(this._pool, (conn, id) => {
 
-            conn.ontrack = callback.bind(conn, id)
+            conn.peer.ontrack = callback.bind(conn, id)
+        })
+    }
+
+    set ondatachannel (callback) {
+        //  общий обработчик должен сохранить ссылку на новый канал
+        //  для использования в дальнейшем для рассылок сообщений
+        this._ondatachannel = (id, event) => {
+            const {channel} = event
+            const {label} = channel
+
+            this._pool[id].channels[label] = channel
+
+            callback(id, event)
+        }
+
+        forEach(this._pool, (conn, id) => {
+
+            conn.peer.ondatachannel = callback.bind(conn, id)
         })
     }
 }
