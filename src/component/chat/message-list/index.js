@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import get from 'lodash/get'
 
 import './message-list.css'
 import Message from '../message'

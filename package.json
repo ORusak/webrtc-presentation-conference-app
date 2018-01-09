@@ -21,15 +21,16 @@
   },
   "license": "MIT",
   "dependencies": {
+    "date-fns": "^1.29.0",
     "lodash": "4.17.4",
     "react": "~16.2.0",
     "react-dom": "~16.2.0",
     "react-redux": "~5.0.6",
     "redux": "~3.7.2",
     "redux-thunk": "2.2.0",
+    "shortid": "2.2.8",
     "socket.io-client": "2.0.4",
-    "webrtc-adapter": "6.0.4",
-    "shortid": "2.2.8"
+    "webrtc-adapter": "6.0.4"
   },
   "devDependencies": {
     "prop-types": "^15.6.0",

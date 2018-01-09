@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import MessageListContainer from '../../container/controls'
+import MessageListContainer from '../../container/message-list'
 import ControlsContainer from '../../container/controls'
 import Video from '../video'
 
@@ -28,6 +28,7 @@ const Room = (props) => (
       </div>
       <div className="col-4 h-100 p-1">
         <div className="row h-75 ml-4">
+          <MessageListContainer/>
         </div>
         <div className="row h-25 ml-4 pt-1">
           <ControlsContainer/>
