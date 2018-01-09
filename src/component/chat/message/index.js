@@ -6,11 +6,12 @@ const Message = ({ message }) => {
     const { id, text, user, date } = message
     //  todo: добавить проверку на формат даты
     const niceDate = format(new Date(date), 'MM.DD.YYYY mm:ss')
+    const isOwnerMessage = user.type === 'owner'
 
     return (
     <li>
         <span
-            className="badge badge-primary"
+            className={`alert w-100 m-1 ${isOwnerMessage ? 'alert-primary float-left' : 'alert-success float-right'}`}
             data-toggle="tooltip"
             data-placement="top"
             _id={id}

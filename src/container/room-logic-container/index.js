@@ -35,8 +35,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             return null
         }, 
 
-        addMessage: (id, text, user, date) => {
-            dispatch(addReceiveMessage(id, text, user, date))
+        addReceiveMessage: (id, text, user, date, isSend) => {
+            dispatch(addReceiveMessage(id, text, user, date, isSend))
 
             return null
         },

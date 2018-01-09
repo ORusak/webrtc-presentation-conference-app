@@ -30,7 +30,7 @@ class RoomLogic extends Component {
         }),
         messages: PropTypes.array,
         setUserType: PropTypes.func.isRequired,
-        addMessage: PropTypes.func.isRequired,
+        addReceiveMessage: PropTypes.func.isRequired,
         setMessageAsSend: PropTypes.func.isRequired,
     }
 
@@ -87,7 +87,7 @@ class RoomLogic extends Component {
     }
 
     render() {
-        const {user, messages, addMessage, setMessageAsSend} = this.props
+        const {user, messages, addReceiveMessage, setMessageAsSend} = this.props
         const isTypeNotDefine = isNil(user.type)
         
         if (isTypeNotDefine) {
@@ -100,7 +100,7 @@ class RoomLogic extends Component {
             signaling={this.state.signaling} 
             user={user}
             messages={messages}
-            addMessage={addMessage}
+            addReceiveMessage={addReceiveMessage}
             setMessageAsSend={setMessageAsSend}/>
     }
 }

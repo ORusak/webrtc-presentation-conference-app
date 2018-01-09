@@ -5,7 +5,7 @@ import './message-list.css'
 import Message from '../message'
 
 const MessageList = ({ list }) => (
-    <ul className="card w-100">
+    <ul className="card w-100" style={{"overflow": "auto"}}>
         {list.map(message => (<Message key={message.id} message={message}/>))}
     </ul>
 )

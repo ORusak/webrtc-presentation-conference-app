@@ -10,12 +10,8 @@ import Room from '../room'
 //  ограничения получения локального медиа потока
 const constraints = {
     video: {
-        width: {
-            exact: 360
-        },
-        height: {
-            exact: 199
-        }
+        width: 360,
+        height: 199
     },
     audio: true
 }
@@ -41,7 +37,8 @@ class RoomVisitor extends Component {
             type: PropTypes.oneOf(['visitor'])
         }),
         messages: PropTypes.array,
-        addMessage: PropTypes.func.isRequired,
+        addReceiveMessage: PropTypes.func.isRequired,
+        setMessageAsSend: PropTypes.func.isRequired,
     }
 
     state = {
@@ -51,7 +48,25 @@ class RoomVisitor extends Component {
         ownerMedia: null,
         visitorMedia: null,
         //  
-        peerConnection: RTCPeerConnection(configuration)
+        peerConnection: new RTCPeerConnection(configuration)
+    }
+
+    /**
+     * Отправка сообщения собственнику комнаты
+     */
+    sendMessage = (message) => {
+        const {channelChat} = this.state
+        
+        //  в спецификации не понятно как точно узнать, что сообщение 
+        //  доставлено. в первичной реалиации считаем что это всегда успешно
+        //  
+        //  по идее можно подписаться на onerror и там установить, что сообщение не доставлено
+        //  или требовать подтвержения с получателя
+        //  todo: реаализовать обработку гарантированной доставки сообщения
+        //  todo: реализовать обертку над протоколом отправки сообщений для обработки передачи данных как строки
+        channelChat.send(JSON.stringify(message))
+
+        this.props.setMessageAsSend(message.id)
     }
 
     async componentDidMount() {
@@ -177,12 +192,14 @@ class RoomVisitor extends Component {
         const dataChannelOptions = {
             ordered: false,
         }
-        const channel = peerConnection.createDataChannel('chat', dataChannelOptions)
+        const channelChat = peerConnection.createDataChannel('chat', dataChannelOptions)
 
-        channel.onopen = () => {
+        this.setState({ channelChat })
+
+        channelChat.onopen = () => {
             console.log('[peerConnection.channel] enable chat')
         }
-        channel.onmessage = (event) => {
+        channelChat.onmessage = (event) => {
             const {id, text, user, date} = JSON.parse(event.data)
 
             console.log('[peerConnection.channel.chat.onmessage] get message chat with id', id)
@@ -198,7 +215,17 @@ class RoomVisitor extends Component {
                 return null
             }
             
-            this.props.addMessage(id, text, user, date)
+            /**  
+             * при получении от собственника рассылки сообщения ставим ему 
+             * признак отправлено, так как отправлять его повторно собственнику не 
+             * требуется у него он есть
+             * 
+             * сам собственник тоже ставит этому сообщению у себя признак отправлено,
+             * но только после отправления сюда.
+            */
+            const isSend = true
+
+            this.props.addReceiveMessage(id, text, user, date, isSend)
         }
     }
 
@@ -216,6 +243,12 @@ class RoomVisitor extends Component {
         console.log('[RoomVisitor.shouldComponentUpdate] Call update')
 
         return true
+    }
+
+    componentDidUpdate (prevProps, prevState) {
+        const {messages} = this.props
+
+        messages.forEach(this.sendMessage) 
     }
 
     render() {

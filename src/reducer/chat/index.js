@@ -43,7 +43,7 @@ export function addMessage (text, user, date, id) {
     }
 }
 
-export function addReceiveMessage (id, text, user, date) {
+export function addReceiveMessage (id, text, user, date, isSend) {
 
     return {
         id,
@@ -51,6 +51,7 @@ export function addReceiveMessage (id, text, user, date) {
         text,
         date,
         user,
+        isSend
     }
 }
 

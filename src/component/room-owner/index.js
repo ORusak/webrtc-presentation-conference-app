@@ -12,12 +12,8 @@ import Room from '../room'
 //  ограничения получения локального медиа потока
 const constraints = {
     video: {
-        width: {
-            exact: 360
-        },
-        height: {
-            exact: 199
-        }
+        width: 360,
+        height: 199
     },
     audio: true
 }
@@ -35,6 +31,7 @@ class RoomOwner extends Component {
         }),
         messages: PropTypes.array,
         setMessageAsSend: PropTypes.func.isRequired,
+        addReceiveMessage: PropTypes.func.isRequired,
     }
 
     state = {
@@ -152,7 +149,26 @@ class RoomOwner extends Component {
                 console.log('[peerConnection.channel.owner] enable chat')
             }
             channel.onmessage = (event) => {
-                console.log('[peerConnection.channel.owner] get message chat', JSON.parse(event.data))
+                const {id, text, user, date} = JSON.parse(event.data)
+
+                console.log('[peerConnection.channel.onmessage] get message chat', id)
+
+                //  фильтрация сообщений
+
+                //  если нам прислали наши же сообщения. например при общей рассылке-синхронизации
+                const isOwnMessage = this.props.user.id === user.id
+
+                if (isOwnMessage) {
+                    console.log('[peerConnection.channel.chat.onmessage] skip own message', id)
+
+                    return null
+                }
+                
+                //  устанавливаем в не отправлено, так как будем делать рассылку на 
+                //  всех участников
+                const isSend = false
+
+                this.props.addReceiveMessage(id, text, user, date, isSend)
             }
         }
 
