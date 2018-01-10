@@ -14,7 +14,7 @@ import RoomOwner from '../room-owner'
 import RoomVisitor from '../room-visitor'
 
 //  todo: вынести в переменные окружения
-const urlSignalingServer = 'http://localhost:8080'
+const urlSignalingServer = process.env.REACT_APP_HOST_URL || 'http://localhost:8080'
 
 class RoomLogic extends Component {
     static defaultProps = {
