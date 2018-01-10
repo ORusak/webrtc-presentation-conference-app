@@ -39,7 +39,7 @@
   },
   "scripts": {
     "start": "NODE_ENV=development react-scripts start",
-    "build": "react-scripts build",
+    "build": "PUBLIC_URL=\"./\" REACT_APP_HOST_URL=\"harebrownblogs.herokuapp.com\" react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
