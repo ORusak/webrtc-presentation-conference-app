@@ -5,16 +5,9 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 
-import Room from '../room'
+import MediaService from '../../service/media'
 
-//  ограничения получения локального медиа потока
-const constraints = {
-    video: {
-        width: 360,
-        height: 199
-    },
-    audio: true
-}
+import Room from '../room'
 
 //  todo: вынести в настройки или в переменные окружения
 const configuration = {
@@ -70,15 +63,11 @@ class RoomVisitor extends Component {
     }
 
     async componentDidMount() {
-        //  получаем доступ к камере и микрофону
-        const visitorMedia = await navigator
-            .mediaDevices
-            .getUserMedia(constraints)
-
+        //  получаем доступ к камере и/или микрофону
+        const visitorMedia = await MediaService.getUserMedia()
         this.setState({visitorMedia})
 
         //  регистрируем обработчики соединений с сигнальным сервером и peer
-        
         const {peerConnection} = this.state
         const {signaling} = this.props
 
@@ -255,7 +244,8 @@ class RoomVisitor extends Component {
 
         return (<Room
             ownerMedia={this.state.ownerMedia}
-            visitorMedia={this.state.visitorMedia}/>)
+            visitorMedia={this.state.visitorMedia}
+            visitor={this.props.user}/>)
     }
 }
 

@@ -6,17 +6,9 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 
 import PoolPeerConnection from '../../lib/pool-connection'
+import MediaService from '../../service/media'
 
 import Room from '../room'
-
-//  ограничения получения локального медиа потока
-const constraints = {
-    video: {
-        width: 360,
-        height: 199
-    },
-    audio: true
-}
 
 class RoomOwner extends Component {
     static defaultProps = {
@@ -60,10 +52,8 @@ class RoomOwner extends Component {
     }
 
     async componentDidMount() {
-        //  получаем доступ к камере и микрофону
-        const ownerMedia = await navigator
-            .mediaDevices
-            .getUserMedia(constraints)
+        //  получаем доступ к камере и/или микрофону
+        const ownerMedia = await MediaService.getUserMedia()
 
         this.setState({ownerMedia})
 
@@ -202,7 +192,8 @@ class RoomOwner extends Component {
 
         return (<Room
             ownerMedia={this.state.ownerMedia}
-            visitorMedia={this.state.visitorMedia}/>)
+            visitorMedia={this.state.visitorMedia}
+            owner={this.props.user}/>)
     }
 }
 
