@@ -27,7 +27,7 @@ class VideoInfo extends React.Component {
 
     return (
       <div className="col card border-danger h-100 w-100">
-        <div class="card-header h-25">
+        <div className="card-header h-25">
         <h6 className="card-title">{userInfo}</h6>
         <h6 className="card-title">{textConstrain[typeMedia]}</h6>
   </div>
