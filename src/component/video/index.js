@@ -38,8 +38,8 @@ class Video extends React.Component {
 
 Video.defaultProps = {
   children: null,
-  height: 200,
-  width: 300,
+  height: '100%',
+  width: '100%',
   muted: true,
   controls: true,
   media: null,
@@ -54,8 +54,8 @@ Video.propTypes = {
       id: PropTypes.string,
     },
   ),
-  height: PropTypes.number,
-  width: PropTypes.number,
+  height: PropTypes.string,
+  width: PropTypes.string,
   muted: PropTypes.bool,
   controls: PropTypes.bool,
 }

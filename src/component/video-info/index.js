@@ -23,12 +23,15 @@ class VideoInfo extends React.Component {
     const { width, height, muted, controls, media, user } = this.props
     const typeMedia = MediaService.getTypeMedia(media)
     const {name, type} = user
-    const userInfo = isEmpty(user) ? '' : `${name}(${type}). `
+    const userInfo = isEmpty(user) ? '-' : `${name}(${type}). `
 
     return (
-      <div className="col card border-danger">
-        <div className="card-body">
-        <h5 className="card-title">{userInfo}{textConstrain[typeMedia]}</h5>
+      <div className="col card border-danger h-100 w-100">
+        <div className="card-header h-25">
+        <h6 className="card-title">{userInfo}</h6>
+        <h6 className="card-title">{textConstrain[typeMedia]}</h6>
+  </div>
+        <div className="card-body h-75">
           <Video
           height={height}
           width={width}
@@ -44,8 +47,8 @@ class VideoInfo extends React.Component {
 }
 
 VideoInfo.defaultProps = {
-  height: 200,
-  width: 300,
+  height: '100%',
+  width: '100%',
   muted: true,
   controls: true,
   media: null,
@@ -64,8 +67,8 @@ VideoInfo.propTypes = {
     name: PropTypes.string,
     type: PropTypes.oneOf(['owner','visitor', null])
   }),
-  height: PropTypes.number,
-  width: PropTypes.number,
+  height: PropTypes.string,
+  width: PropTypes.string,
   muted: PropTypes.bool,
   controls: PropTypes.bool,
 }

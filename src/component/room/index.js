@@ -5,11 +5,13 @@ import MessageListContainer from '../../container/message-list'
 import ControlsContainer from '../../container/controls'
 import VideoInfo from '../video-info'
 
+//  todo: переработать разметку высот элементов
+//  сейчас приходится задавать через инлайн стили
 const Room = ({ownerMedia, visitorMedia, owner, visitor}) => (
   <div className="container h-100">
     <div className="row h-100">
       <div className="col h-100 p-1">
-        <div className="row h-75">
+        <div className="row" style={{height: '60%'}}>
           <div className="col h-100 card border-primary">
             <img
               src={`${process.env.PUBLIC_URL}/webrtc.jpg`}
@@ -17,7 +19,7 @@ const Room = ({ownerMedia, visitorMedia, owner, visitor}) => (
               alt="Responsive" />
           </div>
         </div>
-        <div className="row h-25 pt-1">
+        <div className="row pt-1" style={{height: '40%'}}>
           <VideoInfo media={ownerMedia} user={owner} />
           <VideoInfo media={visitorMedia} user={visitor}/>
         </div>
