@@ -12,6 +12,8 @@
 
 import forEach from 'lodash/forEach'
 
+//  todo: переделать интерфейсные методы на единую инициализацию через Proxy
+
 const configuration = {
     iceServers: [
         {
