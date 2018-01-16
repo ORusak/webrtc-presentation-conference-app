@@ -13,7 +13,10 @@ import Room from '../room'
 const configuration = {
     iceServers: [
         {
-            urls: 'stun:stun.services.mozilla.org'
+            urls: [
+                'stun:stun.services.mozilla.org',
+                'stun:stun:stun.l.google.com:19302',
+            ]
         }
     ]
 }
