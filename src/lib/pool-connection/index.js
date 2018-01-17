@@ -11,6 +11,7 @@
 //  todo: вынести в настройки или в переменные окружения
 
 import forEach from 'lodash/forEach'
+import isFunction from 'lodash/isFunction'
 
 //  todo: переделать интерфейсные методы на единую инициализацию через Proxy
 
@@ -19,10 +20,69 @@ const configuration = {
         {
             urls: [
                 'stun:stun.services.mozilla.org',
-                'stun:stun:stun.l.google.com:19302',
+                'stun:stun.l.google.com:19302',
             ]
         }
     ]
+}
+
+/**
+ * Обработчик proxy get 
+ * Для расширяемого вызова методов RTCPeerConnection в коллекции соединений
+ * 
+ * @param {*} target 
+ * @param {*} prop 
+ */
+function handlerMultiCall (target, prop) {
+    const isRTCPeerMethod = prop in RTCPeerConnection.prototype && isFunction(RTCPeerConnection.prototype[prop])
+    
+    console.debug('[PoolPeerConnection.handlerMultiCall] isRTCPeerMethod', {prop, isRTCPeerMethod})
+
+    if (isRTCPeerMethod) {
+
+        return function (id, ...rest) {
+            if (id) {
+                const {peer} = target._pool[id]
+
+                return Reflect.apply(peer[prop], peer, rest)
+            }
+    
+            throw new Error('[PoolPeerConnection.handlerMultiCall] Expected connection id')
+        }
+    }
+
+    return Reflect.get(...arguments)
+}
+
+/**
+ * Обработчик proxy set 
+ * Для расширяемой инициализации обработчиков событий методов RTCPeerConnection в коллекции соединений
+ * 
+ * @param {*} target 
+ * @param {*} prop 
+ * @param {*} value
+ */
+function handlerMultiSet (target, prop, value) {
+    const isRTCPeerProp = prop in RTCPeerConnection.prototype
+    const isEventHandlerProp = prop.indexOf('on') === 0
+    //  отдельная обработка
+    const isOnDataChannel = prop === 'ondatachannel'
+
+    console.debug('[PoolPeerConnection.handlerMultiSet] Condition', {isRTCPeerProp, isEventHandlerProp, isOnDataChannel})
+
+    if (isRTCPeerProp && isEventHandlerProp && !isOnDataChannel) {
+
+        target[`_${prop}`] = value
+
+        forEach(target._pool, (conn, id) => {
+
+            conn.peer[prop] = value.bind(conn, id)
+        })
+
+        return true
+    }
+
+    return Reflect.set(...arguments)
 }
 
 //  todo: Добавить метод удаления соединения из пула
@@ -47,6 +107,11 @@ class PoolPeerConnection {
          * Ассоциативный массив Connection. Где ключ - идентификатор соединения сокета собеседника.
          */
         this._pool = {}
+
+        return new Proxy(this, {
+            get: handlerMultiCall,
+            set: handlerMultiSet,
+        })
     }
 
     add (id) {
@@ -66,43 +131,14 @@ class PoolPeerConnection {
 
         throw new Error('[PoolPeerConnection.add] Expected connection id')
     }
-
-    addTrack (id, track, localMedia) {
-        if (id) {
-            
-            return this._pool[id].peer.addTrack(track, localMedia)
-        }
-
-        throw new Error('[PoolPeerConnection.addTrack] Expected connection id')
-    }
-
-    setRemoteDescription (id, desc) {
-        if (id) {
-            
-            return this._pool[id].peer.setRemoteDescription(desc)
-        }
-
-        throw new Error('[PoolPeerConnection.setRemoteDescription] Expected connection id')
-    }
-
-    createAnswer(id) {
-        if (id) {
-            
-            return this._pool[id].peer.createAnswer()
-        }
-
-        throw new Error('[PoolPeerConnection.createAnswer] Expected connection id')
-    }
-   
-    setLocalDescription(id, desc) {
-        if (id) {
-            
-            return this._pool[id].peer.setLocalDescription(desc)
-        }
-
-        throw new Error('[PoolPeerConnection.setLocalDescription] Expected connection id')
-    }
-    
+ 
+    /**
+     * Оберертка для указания целевого соеденения
+     * 
+     * @param {string} id 
+     * 
+     * @returns {RTCSessionDescription} -
+     */
     getLocalDescription(id) {
         if (id) {
             
@@ -110,15 +146,6 @@ class PoolPeerConnection {
         }
 
         throw new Error('[PoolPeerConnection.getLocalDescription] Expected connection id')
-    }
-    
-    addIceCandidate(id, candidate) {
-        if (id) {
-            
-            return this._pool[id].peer.addIceCandidate(candidate)
-        }
-
-        throw new Error('[PoolPeerConnection.addIceCandidate] Expected connection id')
     }
 
     sendAll (label, data) {
@@ -133,24 +160,6 @@ class PoolPeerConnection {
             }
 
             throw new Error(`[PoolPeerConnection.sendAll] Peer [${id}]. Not found channel with label [${label}]`)
-        })
-    }
-
-    set onicecandidate (callback) {
-        this._onicecandidate = callback
-
-        forEach(this._pool, (conn, id) => {
-
-            conn.peer.onicecandidate = callback.bind(conn, id)
-        })
-    }
-
-    set ontrack (callback) {
-        this._ontrack = callback
-
-        forEach(this._pool, (conn, id) => {
-
-            conn.peer.ontrack = callback.bind(conn, id)
         })
     }
 
